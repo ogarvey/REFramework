@@ -12,7 +12,7 @@ using REFrameworkNET.Callbacks;
 public class DangerousFunctions {
     [MethodHook(typeof(app.CameraManager), nameof(app.CameraManager.isInside), MethodHookType.Pre)]
     public static REFrameworkNET.PreHookResult isInsidePreHook(Span<ulong> args) {
-        //Console.WriteLine("Inside pre hook (From C#) " + args.ToString());
+        //REFrameworkNET.API.LogInfo("Inside pre hook (From C#) " + args.ToString());
         //REFrameworkNET.API.LogInfo("isInsidePreHook");
         return REFrameworkNET.PreHookResult.Continue;
     }
@@ -22,7 +22,7 @@ public class DangerousFunctions {
         if ((retval & 1) != 0) {
             //REFrameworkNET.API.LogInfo("Camera is inside");
         }
-        //Console.WriteLine("Inside post hook (From C#), retval: " + (retval & 1).ToString());
+        //REFrameworkNET.API.LogInfo("Inside post hook (From C#), retval: " + (retval & 1).ToString());
     }
 
     [MethodHook(typeof(app.PlayerInputProcessorDetail), nameof(app.PlayerInputProcessorDetail.processNormalAttack), MethodHookType.Pre)]
@@ -46,8 +46,8 @@ public class DangerousFunctions {
         via.render.RayTracingManager.PreferShadowCast = true;
 
         // Print the current value
-        Console.WriteLine("RayTracingManager.EnableLod: " + via.render.RayTracingManager.EnableLod.ToString());
-        Console.WriteLine("RayTracingManager.PreferShadowCast: " + via.render.RayTracingManager.PreferShadowCast.ToString());
+        REFrameworkNET.API.LogInfo("RayTracingManager.EnableLod: " + via.render.RayTracingManager.EnableLod.ToString());
+        REFrameworkNET.API.LogInfo("RayTracingManager.PreferShadowCast: " + via.render.RayTracingManager.PreferShadowCast.ToString());
 
         //via.hid.Mouse.set_ShowCursor(false);
         via.hid.Mouse.ShowCursor = false;
@@ -124,21 +124,21 @@ public class DangerousFunctions {
         var range = REFrameworkNET.ValueType.New<via.RangeI>();
         var testVec = REFrameworkNET.ValueType.New<via.vec3>();
 
-        System.Console.WriteLine("Test vec before: " + testVec.x + " " + testVec.y + " " + testVec.z);
+        REFrameworkNET.API.LogInfo("Test vec before: " + testVec.x + " " + testVec.y + " " + testVec.z);
 
         testVec.x = 1.0f;
         testVec.y = 2.0f;
         testVec.z = 3.0f;
 
-        System.Console.WriteLine("Test vec after: " + testVec.x + " " + testVec.y + " " + testVec.z);
+        REFrameworkNET.API.LogInfo("Test vec after: " + testVec.x + " " + testVec.y + " " + testVec.z);
 
         var axisXStatic = via.vec3.AxisX;
         var axisYStatic = via.vec3.AxisY;
         var axisZStatic = via.vec3.AxisZ;
 
-        System.Console.WriteLine("Axis X: " + axisXStatic.x + " " + axisXStatic.y + " " + axisXStatic.z);
-        System.Console.WriteLine("Axis Y: " + axisYStatic.x + " " + axisYStatic.y + " " + axisYStatic.z);
-        System.Console.WriteLine("Axis Z: " + axisZStatic.x + " " + axisZStatic.y + " " + axisZStatic.z);
+        REFrameworkNET.API.LogInfo("Axis X: " + axisXStatic.x + " " + axisXStatic.y + " " + axisXStatic.z);
+        REFrameworkNET.API.LogInfo("Axis Y: " + axisYStatic.x + " " + axisYStatic.y + " " + axisYStatic.z);
+        REFrameworkNET.API.LogInfo("Axis Z: " + axisZStatic.x + " " + axisZStatic.y + " " + axisZStatic.z);
         
         //testVec[0] = 1.0f;
         // print min max to test if this works
@@ -271,7 +271,7 @@ class REFrameworkPlugin {
         sw.Stop();
 
         if (sw.ElapsedMilliseconds >= 6) {
-            Console.WriteLine("BeginRendering took " + sw.ElapsedMilliseconds + "ms");
+            REFrameworkNET.API.LogInfo("BeginRendering took " + sw.ElapsedMilliseconds + "ms");
         }
 
         /*try {
@@ -291,13 +291,13 @@ class REFrameworkPlugin {
 
         if (sw2.ElapsedMilliseconds >= 5000) {
             sw2.Restart();
-            Console.WriteLine("EndRendering");
+            REFrameworkNET.API.LogInfo("EndRendering");
         }
     }
 
     [Callback(typeof(FinalizeRenderer), CallbackType.Pre)]
     static void FinalizeRendererPre() {
-        Console.WriteLine("Finalizing Renderer");
+        REFrameworkNET.API.LogInfo("Finalizing Renderer");
     }
 
     [Callback(typeof(PrepareRendering), CallbackType.Post)]
@@ -362,10 +362,10 @@ class REFrameworkPlugin {
         foreach (var singletonDesc in singletons) {
             var singleton = singletonDesc.Instance;
 
-            Console.WriteLine(singleton.GetTypeDefinition().GetFullName());
+            REFrameworkNET.API.LogInfo(singleton.GetTypeDefinition().GetFullName());
             var isManagedObject = REFrameworkNET.ManagedObject.IsManagedObject(singleton.GetAddress());
 
-            Console.WriteLine(" Is managed object: " + isManagedObject.ToString());
+            REFrameworkNET.API.LogInfo(" Is managed object: " + isManagedObject.ToString());
 
             // Log all methods
             var td = singleton.GetTypeDefinition();
@@ -377,13 +377,13 @@ class REFrameworkPlugin {
                     postfix += param.Type.GetFullName() + " " + param.Name + ", ";
                 }
 
-                Console.WriteLine(" " + method.GetName() + " " + postfix);
+                REFrameworkNET.API.LogInfo(" " + method.GetName() + " " + postfix);
             }
 
             var fields = td.GetFields();
 
             foreach (var field in fields) {
-                Console.WriteLine(" " + field.GetName());
+                REFrameworkNET.API.LogInfo(" " + field.GetName());
             }
         }*/
 

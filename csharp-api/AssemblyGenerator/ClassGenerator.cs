@@ -545,7 +545,7 @@ public class ClassGenerator {
 
             // Make sure field name only contains ASCII characters
             if (field.Name.Any(c => c > 127)) {
-                System.Console.WriteLine("Skipping field with non-ASCII characters: " + field.Name + " " + field.Index);
+                REFrameworkNET.API.LogInfo("Skipping field with non-ASCII characters: " + field.Name + " " + field.Index);
                 continue;
             }
             
@@ -555,7 +555,7 @@ public class ClassGenerator {
 
             // Some kind of limitation in the runtime prevents too many methods in the class
             if (totalFields >= (ushort.MaxValue - 15) / 2) {
-                System.Console.WriteLine("Skipping fields in " + t.FullName + " because it has too many fields (" + fields.Count + ")");
+                REFrameworkNET.API.LogInfo("Skipping fields in " + t.FullName + " because it has too many fields (" + fields.Count + ")");
                 break;
             }
         }
@@ -744,7 +744,7 @@ public class ClassGenerator {
                 validMethods.Add(m);
             }
         } catch (Exception e) {
-            Console.WriteLine("ASDF Error: " + e.Message);
+            REFrameworkNET.API.LogInfo("ASDF Error: " + e.Message);
         }
 
         var matchingMethods = validMethods
@@ -761,7 +761,7 @@ public class ClassGenerator {
             // Hacky fix for MHR because parent classes have the same method names
             // while we support that, we don't support constructed generic arguments yet, they are just "object"
             if (methodName == "sortCountList") {
-                Console.WriteLine("Skipping sortCountList");
+                REFrameworkNET.API.LogInfo("Skipping sortCountList");
                 return null;
             }
 
@@ -932,7 +932,7 @@ public class ClassGenerator {
             }
 
             if (seenMethodSignatures.Contains(simpleMethodSignature)) {
-                Console.WriteLine("Skipping duplicate method: " + methodDeclaration.GetText().ToString());
+                REFrameworkNET.API.LogInfo("Skipping duplicate method: " + methodDeclaration.GetText().ToString());
                 return null;
             }
 
@@ -977,7 +977,7 @@ public class ClassGenerator {
         foreach (var nestedT in nestedTypes ?? []) {
             var nestedTypeName = nestedT.FullName ?? "";
 
-            //System.Console.WriteLine("Nested type: " + nestedTypeName);
+            //REFrameworkNET.API.LogInfo("Nested type: " + nestedTypeName);
 
             if (nestedTypeName == "") {
                 continue;

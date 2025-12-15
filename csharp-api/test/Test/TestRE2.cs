@@ -100,9 +100,9 @@ public class TestRE2Plugin {
     [REFrameworkNET.Attributes.PluginEntryPoint]
     public static void Main() {
         if (IsRunningRE2) {
-            Console.WriteLine("Running in RE2");
+            REFrameworkNET.API.LogInfo("Running in RE2");
         } else {
-            Console.WriteLine("Not running in RE2");
+            REFrameworkNET.API.LogInfo("Not running in RE2");
             return;
         }
 
@@ -152,7 +152,7 @@ public class TestRE2Plugin {
                         /*var backToPlayerController = gameobj.getComponent(app.Collision.HitController.REFType.GetRuntimeType().As<_System.Type>());
 
                         if (backToPlayerController != null) {
-                            //System.Console.WriteLine("Back to player controller!!!");
+                            //REFrameworkNET.API.LogInfo("Back to player controller!!!");
                         }*/
                     }
                     //get_GameObjectFn.Invoke(playerController, null);
@@ -161,7 +161,7 @@ public class TestRE2Plugin {
                 }
 
                 var refCount = ((playerController.GameObject as IProxy).GetInstance() as ManagedObject).GetReferenceCount();
-                System.Console.WriteLine("PlayerController ref count: " + refCount);
+                REFrameworkNET.API.LogInfo("PlayerController ref count: " + refCount);
             }
         }
     }

@@ -492,7 +492,7 @@ class ObjectExplorer {
                 ImGui.TreePop();
             }
         } catch (Exception e) {
-            System.Console.WriteLine(e.ToString());
+            REFrameworkNET.API.LogInfo(e.ToString());
         }
     }
 } // class ObjectExplorer

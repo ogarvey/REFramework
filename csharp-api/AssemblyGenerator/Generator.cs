@@ -123,18 +123,21 @@ public class Il2CppDump {
             return;
         }
 
-        context.GetType(0).GetFullName(); // initialize the types
-
+        var cName =context.GetType(0).GetFullName(); // initialize the types
+        REFrameworkNET.API.LogInfo($"Initialized first type: {cName}");
         //Parallel.For(0, context.GetNumTypes(), i =>
         foreach (REFrameworkNET.TypeDefinition t in context.Types) {
             //var t = context.GetType((uint)i);
             if (t == null) {
-                //Console.WriteLine("Failed to get type " + i);
+                //REFrameworkNET.API.LogInfo("Failed to get type " + i);
                 continue;
             }
 
             var tDeclaringType = t.DeclaringType;
-            if (tDeclaringType != null) {
+
+            if (tDeclaringType != null)
+            {
+                REFrameworkNET.API.LogInfo($"Filling type extension for type: {t.GetFullName()}");
                 var ext = GetOrAddTypeExtension(tDeclaringType);
                 ext.NestedTypes.Add(t);
             }
@@ -144,6 +147,8 @@ public class Il2CppDump {
                 // We dont go through all parents, because GetMethod does that for us
                 // Going through all parents would exponentially increase the number of checks and they would be redundant
                 var parent = t.ParentType;
+                
+                REFrameworkNET.API.LogInfo($"Filling method extensions for type: {t.GetFullName()}");
                 var tMethods = t.GetMethods();
 
                 //foreach (var method in t.Methods) {
@@ -310,7 +315,7 @@ public class AssemblyGenerator {
 
             if (!namespaces.TryGetValue(ns, out NamespaceDeclarationSyntax? value)) {
                 //ns = Regex.Replace(ns, @"[^a-zA-Z0-9.]", "_");
-                Console.WriteLine("Creating namespace " + ns);
+                REFrameworkNET.API.LogInfo("Creating namespace " + ns);
                 value = SyntaxTreeBuilder.CreateNamespace(ns);
                 namespaces[ns] = value;
             }
@@ -318,7 +323,7 @@ public class AssemblyGenerator {
             return value;
         } 
 
-        //Console.WriteLine("Failed to extract namespace from " + t.GetFullName());
+        //REFrameworkNET.API.LogInfo("Failed to extract namespace from " + t.GetFullName());
         if (!namespaces.TryGetValue("_", out NamespaceDeclarationSyntax? value2)) {
             value2 = SyntaxTreeBuilder.CreateNamespace("_");
             namespaces["_"] = value2;
@@ -402,7 +407,7 @@ public class AssemblyGenerator {
                         var isolatedArrayTypeName = arrayType.FullName?.Split('.').Last();
 
                         if (isolatedArrayTypeName == isolatedNestedName) {
-                            System.Console.WriteLine("Found equivalent array type for " + nestedT.FullName);
+                            REFrameworkNET.API.LogInfo("Found equivalent array type for " + nestedT.FullName);
                             equivalentArray = arrayType;
                             return;
                         }
@@ -482,7 +487,7 @@ public class AssemblyGenerator {
         var elementTypeDef = t.GetElementType();
 
         if (elementTypeDef == null || !t.IsDerivedFrom(SystemArrayT)) {
-            System.Console.WriteLine("Failed to get element type for " + t.FullName);
+            REFrameworkNET.API.LogInfo("Failed to get element type for " + t.FullName);
             return false;
         }
 
@@ -550,7 +555,7 @@ public class AssemblyGenerator {
             var typeName = t.GetFullName();
 
             if (typeName.Length == 0) {
-                Console.WriteLine("Bad type name");
+                REFrameworkNET.API.LogInfo("Bad type name");
                 continue;
             }
 
@@ -564,7 +569,7 @@ public class AssemblyGenerator {
             }
 
             if (typeName.Any(c => c > 127)) {
-                System.Console.WriteLine("Skipping type with non-ascii characters " + typeName);
+                REFrameworkNET.API.LogInfo("Skipping type with non-ascii characters " + typeName);
                 continue;
             }
 
@@ -572,7 +577,7 @@ public class AssemblyGenerator {
             /*var runtimeType = t.GetRuntimeType();
 
             if (runtimeType != null && (runtimeType as dynamic).get_IsInterface()) {
-                System.Console.WriteLine("Skipping interface " + typeName);
+                REFrameworkNET.API.LogInfo("Skipping interface " + typeName);
                 continue;
             }
 
@@ -612,7 +617,7 @@ public class AssemblyGenerator {
         }
 
         if (t == null) {
-            Console.WriteLine("Failed to find type");
+            REFrameworkNET.API.LogInfo("Failed to find type");
             return compilationUnit;
         }
 
@@ -622,7 +627,7 @@ public class AssemblyGenerator {
         }
 
         if (generatedTypes.Contains(typeName)) {
-            //Console.WriteLine("Skipping already generated type " + typeName);
+            //REFrameworkNET.API.LogInfo("Skipping already generated type " + typeName);
             return compilationUnit;
         }
 
@@ -630,7 +635,7 @@ public class AssemblyGenerator {
 
         // do not generate array types directly, we do it manually per element type
         if (typeName.Contains("[]")) {
-            Console.WriteLine("Skipping array type " + typeName);
+            REFrameworkNET.API.LogInfo("Skipping array type " + typeName);
             return compilationUnit;
         }
 
@@ -651,7 +656,7 @@ public class AssemblyGenerator {
                 var myNamespace = SyntaxTreeBuilder.AddMembersToNamespace(generatedNamespace, generator.EnumDeclaration);
                 compilationUnit = SyntaxTreeBuilder.AddMembersToCompilationUnit(compilationUnit, myNamespace);
             } else {
-                Console.WriteLine("Failed to create namespace for " + typeName);
+                REFrameworkNET.API.LogInfo("Failed to create namespace for " + typeName);
             }
 
             ForEachArrayType(t, (arrayType) => {
@@ -693,13 +698,13 @@ public class AssemblyGenerator {
                 var myNamespace = SyntaxTreeBuilder.AddMembersToNamespace(generatedNamespace, generator.TypeDeclaration);
                 compilationUnit = SyntaxTreeBuilder.AddMembersToCompilationUnit(compilationUnit, myNamespace);
             } else {
-                Console.WriteLine("Failed to create namespace for " + typeName);
+                REFrameworkNET.API.LogInfo("Failed to create namespace for " + typeName);
             }
 
             ForEachArrayType(t, (arrayType) => {
                 var arrayTypeName = typeFullRenames[arrayType];
 
-                System.Console.WriteLine("Generating array type " + arrayTypeName + " from " + t.FullName);
+                REFrameworkNET.API.LogInfo("Generating array type " + arrayTypeName + " from " + t.FullName);
 
                 if (arrayTypeName == "_.System.Array[]") {
                     typeFullRenames[arrayType] = "System.Array_Array1D";
@@ -731,12 +736,12 @@ public class AssemblyGenerator {
         try {
             return MainImpl();
         } catch (Exception e) {
-            Console.WriteLine("Exception: " + e);
+            REFrameworkNET.API.LogInfo("Exception: " + e);
 
             var ex = e;
             while (ex.InnerException != null) {
                 ex = ex.InnerException;
-                Console.WriteLine("Inner Exception: " + ex);
+                REFrameworkNET.API.LogInfo("Inner Exception: " + ex);
             }
         }
 
@@ -775,14 +780,14 @@ public class AssemblyGenerator {
             var t = tdb.GetType(tIndex);
 
             if (t == null) {
-                Console.WriteLine("Failed to get type " + tIndex);
+                REFrameworkNET.API.LogInfo("Failed to get type " + tIndex);
                 continue;
             }
 
             dynamic runtimeType = t.GetRuntimeType();
 
             if (runtimeType == null) {
-                Console.WriteLine("Failed to get runtime type for " + t.GetFullName());
+                REFrameworkNET.API.LogInfo("Failed to get runtime type for " + t.GetFullName());
                 continue;
             }
 
@@ -802,14 +807,14 @@ public class AssemblyGenerator {
             var th = reEngineT.get_TypeHandle();
 
             if (th == null) {
-                Console.WriteLine("Failed to get type handle for " + reEngineT.get_FullName());
+                REFrameworkNET.API.LogInfo("Failed to get type handle for " + reEngineT.get_FullName());
                 continue;
             }
 
             var t = th as REFrameworkNET.TypeDefinition;
 
             if (t == null) {
-                Console.WriteLine("Failed to convert type handle for " + reEngineT.get_FullName());
+                REFrameworkNET.API.LogInfo("Failed to convert type handle for " + reEngineT.get_FullName());
                 continue;
             }
 
@@ -822,7 +827,7 @@ public class AssemblyGenerator {
             REFrameworkNET.API.LocalFrameGC();
         }
 
-        System.Console.WriteLine("Compiling " + strippedAssemblyName + " with " + compilationUnits.Count + " compilation units...");
+        REFrameworkNET.API.LogInfo("Compiling " + strippedAssemblyName + " with " + compilationUnits.Count + " compilation units...");
 
         List<SyntaxTree> syntaxTrees = new List<SyntaxTree>();
 
@@ -843,7 +848,7 @@ public class AssemblyGenerator {
 
         //compilationUnit = compilationUnit.AddUsings(SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System")));
 
-        System.Console.WriteLine("Compiling " + strippedAssemblyName + " with " + syntaxTrees.Count + " syntax trees...");
+        REFrameworkNET.API.LogInfo("Compiling " + strippedAssemblyName + " with " + syntaxTrees.Count + " syntax trees...");
 
         var csoptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, 
             optimizationLevel: OptimizationLevel.Release,
@@ -870,14 +875,14 @@ public class AssemblyGenerator {
                 foreach (Diagnostic diagnostic in sortedDiagnostics)
                 {
                     var textLines = diagnostic.Location.SourceTree?.GetText().Lines;
-                    Console.WriteLine($"{diagnostic.Id}: {diagnostic.GetMessage()}");
+                    REFrameworkNET.API.LogInfo($"{diagnostic.Id}: {diagnostic.GetMessage()}");
 
                     var lineSpan = diagnostic.Location.GetLineSpan();
                     var errorLineNumber = lineSpan.StartLinePosition.Line;
                     var errorLineText = textLines?[errorLineNumber].ToString();
-                    Console.WriteLine($"Error in line {errorLineNumber + 1}: {errorLineText}");
-                    //Console.WriteLine(diagnostic.Location.SourceTree?.GetText());
-                    //Console.WriteLine(
+                    REFrameworkNET.API.LogInfo($"Error in line {errorLineNumber + 1}: {errorLineText}");
+                    //REFrameworkNET.API.LogInfo(diagnostic.Location.SourceTree?.GetText());
+                    //REFrameworkNET.API.LogInfo(
                         //$"Error in line {errorLineNumber + 1}: {lineSpan.StartLinePosition.Character + 1} - {lineSpan.EndLinePosition.Character + 1}");
                 }
 
